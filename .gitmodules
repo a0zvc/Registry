@@ -16,3 +16,6 @@
 [submodule "lib/solidity-lib"]
 	path = lib/solidity-lib
 	url = https://github.com/Uniswap/solidity-lib
+[submodule "lib/uniswapv2-solc0.8"]
+	path = lib/uniswapv2-solc0.8
+	url = https://github.com/a0zvc/uniswapv2-solc0.8
