@@ -10,44 +10,6 @@
     ]
   },
   "files": {
-    "lib/forge-std/lib/ds-test/src/test.sol": {
-      "lastModificationDate": 1655829560496,
-      "contentHash": "962996f0e05d5218857a538a62d7c47e",
-      "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs"
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": ">=0.5.0",
-      "artifacts": {
-        "DSTest": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "test.sol/DSTest.json"
-        }
-      }
-    },
     "lib/forge-std/src/Script.sol": {
       "lastModificationDate": 1655829548128,
       "contentHash": "a24c6682dfdd459618422202d7b97fec",
@@ -86,7 +48,7 @@
       "versionRequirement": ">=0.6.0, <0.9.0",
       "artifacts": {
         "Script": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Script.sol/Script.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Script.sol/Script.json"
         }
       }
     },
@@ -121,25 +83,25 @@
         }
       },
       "imports": [
-        "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Script.sol",
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol"
+        "lib/forge-std/src/console2.sol",
+        "lib/solmate/lib/ds-test/src/test.sol"
       ],
       "versionRequirement": ">=0.6.0, <0.9.0",
       "artifacts": {
         "Test": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/Test.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Test.sol/Test.json"
         },
         "stdError": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdError.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Test.sol/stdError.json"
         },
         "stdMath": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdMath.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Test.sol/stdMath.json"
         },
         "stdStorage": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdStorage.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Test.sol/stdStorage.json"
         }
       }
     },
@@ -177,7 +139,7 @@
       "versionRequirement": ">=0.6.0",
       "artifacts": {
         "Vm": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Vm.sol/Vm.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "Vm.sol/Vm.json"
         }
       }
     },
@@ -215,7 +177,7 @@
       "versionRequirement": ">=0.4.22, <0.9.0",
       "artifacts": {
         "console": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "console.sol/console.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "console.sol/console.json"
         }
       }
     },
@@ -253,57 +215,14 @@
       "versionRequirement": ">=0.4.22, <0.9.0",
       "artifacts": {
         "console2": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "console2.sol/console2.json"
+          "0.8.12+commit.f00d7308.Linux.gcc": "console2.sol/console2.json"
         }
       }
     },
-    "script/Contract.s.sol": {
-      "lastModificationDate": 1655829560396,
-      "contentHash": "3642d05d9c479368231825c40aaa276a",
-      "sourceName": "script/Contract.s.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs"
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "lib/forge-std/src/Script.sol",
-        "lib/forge-std/src/Vm.sol",
-        "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol"
-      ],
-      "versionRequirement": "^0.8.13",
-      "artifacts": {
-        "ContractScript": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Contract.s.sol/ContractScript.json"
-        }
-      }
-    },
-    "src/Contract.sol": {
-      "lastModificationDate": 1655829560396,
-      "contentHash": "0a4db02f64172ef6ba21d89f49444a92",
-      "sourceName": "src/Contract.sol",
+    "lib/solmate/lib/ds-test/src/test.sol": {
+      "lastModificationDate": 1655831235518,
+      "contentHash": "962996f0e05d5218857a538a62d7c47e",
+      "sourceName": "lib/solmate/lib/ds-test/src/test.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -331,17 +250,93 @@
         }
       },
       "imports": [],
-      "versionRequirement": "^0.8.13",
+      "versionRequirement": ">=0.5.0",
       "artifacts": {
-        "Contract": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Contract.sol/Contract.json"
+        "DSTest": {
+          "0.8.12+commit.f00d7308.Linux.gcc": "test.sol/DSTest.json"
         }
       }
     },
-    "test/Contract.t.sol": {
-      "lastModificationDate": 1655829560396,
-      "contentHash": "848ba83feec29a2e4d286c118102ae20",
-      "sourceName": "test/Contract.t.sol",
+    "lib/solmate/src/auth/Owned.sol": {
+      "lastModificationDate": 1655831234766,
+      "contentHash": "3614611f004e59330b08437861886977",
+      "sourceName": "lib/solmate/src/auth/Owned.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "Owned": {
+          "0.8.15+commit.e14f2714.Linux.gcc": "Owned.sol/Owned.json"
+        }
+      }
+    },
+    "lib/solmate/src/tokens/ERC20.sol": {
+      "lastModificationDate": 1655831234770,
+      "contentHash": "a0b1801a2ffe030a0f4ff4d508ceb74f",
+      "sourceName": "lib/solmate/src/tokens/ERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "ERC20": {
+          "0.8.15+commit.e14f2714.Linux.gcc": "ERC20.sol/ERC20.json"
+        }
+      }
+    },
+    "script/DeployRegistry.s.sol": {
+      "lastModificationDate": 1655830933661,
+      "contentHash": "e46071bd87feeac2cbd7278e647f649f",
+      "sourceName": "script/DeployRegistry.s.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -369,17 +364,101 @@
         }
       },
       "imports": [
-        "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Script.sol",
-        "lib/forge-std/src/Test.sol",
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol"
       ],
-      "versionRequirement": "^0.8.13",
+      "versionRequirement": "=0.8.12",
       "artifacts": {
-        "ContractTest": {
-          "0.8.13+commit.abaa5c0e.Linux.gcc": "Contract.t.sol/ContractTest.json"
+        "DeployRegistry": {
+          "0.8.12+commit.f00d7308.Linux.gcc": "DeployRegistry.s.sol/DeployRegistry.json"
+        }
+      }
+    },
+    "src/Registry.sol": {
+      "lastModificationDate": 1655848654457,
+      "contentHash": "3b8f3d1594f21e90badb9f8331d7848d",
+      "sourceName": "src/Registry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/solmate/src/auth/Owned.sol",
+        "lib/solmate/src/tokens/ERC20.sol"
+      ],
+      "versionRequirement": "=0.8.15",
+      "artifacts": {
+        "Registry": {
+          "0.8.15+commit.e14f2714.Linux.gcc": "Registry.sol/Registry.json"
+        }
+      }
+    },
+    "test/RegistryTest.sol": {
+      "lastModificationDate": 1655835445860,
+      "contentHash": "9615f6321e13a36387adb10ea2b8d8b3",
+      "sourceName": "test/RegistryTest.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/solmate/lib/ds-test/src/test.sol"
+      ],
+      "versionRequirement": "=0.8.12",
+      "artifacts": {
+        "RegistryTest": {
+          "0.8.12+commit.f00d7308.Linux.gcc": "RegistryTest.sol/RegistryTest.json"
         }
       }
     }
