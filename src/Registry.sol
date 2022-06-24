@@ -23,6 +23,10 @@ contract Registry is
             owner = _chairperson;
         }
 
+    mapping(address => address) parentAuthPool;
+
+    error EntryAlreadyExists();
+    
     /// @inheritdoc IRegistry
     function setExternalPoints(address _router, address _factory, address _reliableERC20) override external onlyOwner returns(bool) {
         Router = IUniswapV2Router(_router);
@@ -30,6 +34,13 @@ contract Registry is
         thirdToken = IERC20(_reliableERC20);
     }
 
+    /// @inheritdoc IRegistry
+    function selfRegister(address _parentToken) override external returns (address pool) {
+        if (parentAuthPool[msg.sender] == address(0)) revert EntryAlreadyExists();
+        /// check condition
+        /// register state effects
+        /// create parent pool
+    }
 
 }
 
