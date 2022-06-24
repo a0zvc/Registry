@@ -9,6 +9,10 @@ interface IRegistry {
     /// @param _reliableERC20 third party ERC20 (DAI/USDC etc.) used for value determinations
     function setExternalPoints(address _router, address _factory, address _reliableERC20) external returns (bool);
 
+    /// @notice authorizes msg.sender as Deal constructor on the basis of configured conditions
+    /// @param _parentToken ERC20 unit of Parent value. Will be paired with children tokens in LP nexus
+    /// @param pool address of Registry-Parent
+    function selfRegister(address _parentToken) external returns (address pool);
 
 
 }
