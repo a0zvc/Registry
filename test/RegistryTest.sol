@@ -31,7 +31,6 @@ contract RegistryTest is Test {
         address ownerO;
         DAOToken DT = new DAOToken();
 
-
     function setUp() public {
         wETH = new WETH();
         Factory = new UniswapV2Factory(address(this));
@@ -41,11 +40,16 @@ contract RegistryTest is Test {
         ownerO = address(2);
     }
 
-    function testExpectRevert() public {
-        //R.calculateInitValue();
+    function testREVERTSUnititialized() public {
         vm.expectRevert(bytes("PausedOrUninitialized"));
         /// undescript address
         vm.prank(address(3));
         R.selfRegister(address(DT));
+        vm.expectRevert(bytes("PausedOrUninitialized"));
+        vm.prank(address(4));
+        R.calculateInitValue();
+
     }
+
+
 }

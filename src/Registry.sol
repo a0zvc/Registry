@@ -27,7 +27,8 @@ contract Registry is
 
     mapping(address => address) parentAuthPool;
 
-    uint256 eligibilityShare;
+    /// @notice share of totalSupply used to determine value to be pladged
+    uint256 public eligibilityShare;
 
     /// ######### Events #
 
@@ -39,7 +40,6 @@ contract Registry is
     error ValueConditionNotMet();
     error PausedOrUninitialized();
 
-
     /// ######## Modifiers
 
     modifier isInit() {
@@ -47,13 +47,13 @@ contract Registry is
         _;
     }
 
-    function setParentAuthPoolToZero(address _currentPoolAddr) external onlyOwner returns (bool) {
+    function setParentAuthPoolToZero(address _currentPoolAddr) external onlyOwner returns (address) {
         require(eligibilityShare > 0, "is default 0");
-        parentAuthPool[address(this)] = parentAuthPool[address(this)] == _currentPoolAddr ? address(0) : _currentPoolAddr;
+        return parentAuthPool[address(this)] = parentAuthPool[address(this)] == _currentPoolAddr ? address(0) : _currentPoolAddr;
     }
 
     /// @inheritdoc IRegistry
-    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(bool) {
+    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(bool s) {
         Router = IUniswapV2Router(_router);
         Factory = IUniswapV2Factory(_factory);
         thirdToken = IERC20(_reliableERC20);
@@ -61,6 +61,7 @@ contract Registry is
         eligibilityShare = _tributeShare;
         parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
 
+        s= parentAuthPool[address(this)] != address(0) ? true : false;
     }
 
     /// @inheritdoc IRegistry
@@ -69,7 +70,7 @@ contract Registry is
         assembly { _pool := 1 } // nonReentrant
         uint256 initCost = calculateInitValue();
         if (! ( thirdToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
-        parentAuthPool[msg.sender] =  Factory.createPair(address(this),_parentToken);
+        _pool = parentAuthPool[msg.sender] =  Factory.createPair(address(this),_parentToken);
         address[] memory path1;
         path1[0] = address(thirdToken);
         path1[1] = address(this);
@@ -78,19 +79,21 @@ contract Registry is
 
         path1[1] = _parentToken;
 
-        Router.addLiquidity(
+        (,,uint liquidity) = Router.addLiquidity(
             address(this),
             _parentToken,
             initCost,
             Router.swapExactTokensForTokens(initCost, 1, path1, address(this), block.timestamp)[1],
             1,
             1,
-            parentAuthPool[msg.sender],
+            address(this),
             block.timestamp
-        );
+        ); 
 
+        require( liquidity > 1 && _pool != address(1), "SelfRegister Failed");
         _mint(msg.sender, initCost);
 
+        _pool = parentAuthPool[msg.sender] != address(1) ? parentAuthPool[msg.sender] : address(0);
         emit selfRegistered(_parentToken, parentAuthPool[msg.sender], msg.sender);
     }
 
