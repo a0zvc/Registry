@@ -20,10 +20,6 @@ contract Registry is
         IUniswapV2Factory Factory;
         IERC20 thirdToken;
 
-        constructor(address _chairperson){
-            require(_chairperson != address(0), "address 0");
-            owner = _chairperson;
-        }
 
     mapping(address => address) parentAuthPool;
 
@@ -33,7 +29,10 @@ contract Registry is
     /// ######### Events #
 
     event selfRegistered(address indexed _parentToken, address indexed _pool, address indexed _sender);
-
+    event ChangedRouterorFactory(address indexed router, address indexed factory);
+    event ChangedBaseToken(address indexed token);
+    event externalPointsChanged(address indexed router, address indexed factory, address indexed reliableERC20, uint256 tributeShare);
+    
     /// ######### ERRORS #
     
     error EntryAlreadyExists();
@@ -53,15 +52,27 @@ contract Registry is
     }
 
     /// @inheritdoc IRegistry
-    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(bool s) {
-        Router = IUniswapV2Router(_router);
-        Factory = IUniswapV2Factory(_factory);
-        thirdToken = IERC20(_reliableERC20);
+    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(address) {
+        require(_router != address(0) && _factory != address(0) && _reliableERC20 != address(0) && _tributeShare >0, "zero val given");
+        
+        if (_reliableERC20 != address(thirdToken) ){
+            /// @consider 'UniswapV2: PAIR_EXISTS' revert
+            parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
+            thirdToken = IERC20(_reliableERC20);        
+        }
 
-        eligibilityShare = _tributeShare;
-        parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
+        if (_router != address(Router) || _factory != address(Factory)){
+            Router = IUniswapV2Router(_router);
+            Factory = IUniswapV2Factory(_factory);
 
-        s= parentAuthPool[address(this)] != address(0) ? true : false;
+            parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
+        }
+
+        if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
+
+        emit externalPointsChanged(_router,_factory, _reliableERC20,_tributeShare);
+        return parentAuthPool[address(this)];
+
     }
 
     /// @inheritdoc IRegistry
@@ -88,12 +99,12 @@ contract Registry is
             1,
             address(this),
             block.timestamp
-        ); 
+        );
 
-        require( liquidity > 1 && _pool != address(1), "SelfRegister Failed");
+        require( liquidity > 1, "SelfRegister Failed");
+        require(_pool != address(0), "");
         _mint(msg.sender, initCost);
 
-        _pool = parentAuthPool[msg.sender] != address(1) ? parentAuthPool[msg.sender] : address(0);
         emit selfRegistered(_parentToken, parentAuthPool[msg.sender], msg.sender);
     }
 

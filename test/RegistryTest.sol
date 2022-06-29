@@ -36,20 +36,32 @@ contract RegistryTest is Test {
         Factory = new UniswapV2Factory(address(this));
         Router = new UniswapV2Router(address(Factory), address(wETH));
 
-        R = new Registry(address(2));
+        vm.prank(address(2));
+        R = new Registry();
         ownerO = address(2);
     }
 
-    function testREVERTSUnititialized() public {
+    function testCannotUniinitialized() public {
         vm.expectRevert(bytes("PausedOrUninitialized"));
-        /// undescript address
         vm.prank(address(3));
         R.selfRegister(address(DT));
         vm.expectRevert(bytes("PausedOrUninitialized"));
         vm.prank(address(4));
         R.calculateInitValue();
+    }
+
+    function testCannotInitialize() public {
+        /// it tests that initialize attemtp not owner
+        /// deployer (this) 0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84
+        vm.startPrank(address(9));
 
     }
+
+    function testCannotRecreateSameFactory() public {
+        
+    }
+
+    function testCannotsetParentAuthPoolToZero() public {}
 
 
 }
