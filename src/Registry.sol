@@ -29,10 +29,8 @@ contract Registry is
     /// ######### Events #
 
     event selfRegistered(address indexed _parentToken, address indexed _pool, address indexed _sender);
-    event ChangedRouterorFactory(address indexed router, address indexed factory);
-    event ChangedBaseToken(address indexed token);
     event externalPointsChanged(address indexed router, address indexed factory, address indexed reliableERC20, uint256 tributeShare);
-    
+    event PausedOrUnpaused();
     /// ######### ERRORS #
     
     error EntryAlreadyExists();
@@ -48,7 +46,10 @@ contract Registry is
 
     function setParentAuthPoolToZero(address _currentPoolAddr) external onlyOwner returns (address) {
         require(eligibilityShare > 0, "is default 0");
+
+        emit PausedOrUnpaused();
         return parentAuthPool[address(this)] = parentAuthPool[address(this)] == _currentPoolAddr ? address(0) : _currentPoolAddr;
+        
     }
 
     /// @inheritdoc IRegistry
