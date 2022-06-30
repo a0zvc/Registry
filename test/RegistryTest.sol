@@ -42,13 +42,16 @@ contract RegistryTest is Test {
         address defaultForge = address(0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
 
     function setUp() public {
+        vm.prank(address(5));
         wETH = new WETH();
-        Factory = new UniswapV2Factory(address(this));
+        vm.startPrank(address(2));
+        Factory = new UniswapV2Factory(address(2));
+        Factory.setFeeTo(address(2));
         Router = new UniswapV2Router(address(Factory), address(wETH));
 
-        vm.prank(address(2));
         R = new Registry();
         owner = address(2);
+        vm.stopPrank();
     }
 
     function testCannotUniinitialized() public {
@@ -86,12 +89,20 @@ contract RegistryTest is Test {
     function testInitialize() public {
         /// test can initialize via setExternalPoints
         vm.prank(owner);
-        IUniswapV2Pair pool = IUniswapV2Pair( R.setExternalPoints(address(Router), address(Factory), address(strongAndStable), 100));
+        address p = R.setExternalPoints(address(Router), address(Factory), address(strongAndStable), 100);
+        IUniswapV2Pair pool = IUniswapV2Pair(p);
         assertTrue(address(pool) != address(0), "failed on pool address is 0");
         assertTrue(pool.token0() != address(0), "failed on token address is 0");
 
         /// can calulate initValue if it can pass isInit() modifier
 
+    }
+
+    function testCannotPausedWhenUninit(address _any) public {
+        vm.assume(_any != address(0));
+        vm.expectRevert(bytes("is default 0"));
+        vm.prank(owner);
+        R.setParentAuthPoolToZero(_any);
     }
 
     function testCannotRecreateSameFactory() public {

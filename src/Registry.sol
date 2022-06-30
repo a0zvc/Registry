@@ -56,17 +56,18 @@ contract Registry is
     function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(address) {
         require(_router != address(0) && _factory != address(0) && _reliableERC20 != address(0) && _tributeShare >0, "zero val given");
         
-        if (_reliableERC20 != address(thirdToken) ){
-            /// @consider 'UniswapV2: PAIR_EXISTS' revert
-            parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
-            thirdToken = IERC20(_reliableERC20);        
-        }
 
         if (_router != address(Router) || _factory != address(Factory)){
             Router = IUniswapV2Router(_router);
             Factory = IUniswapV2Factory(_factory);
 
             parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
+        }
+
+        if (_reliableERC20 != address(thirdToken)){
+            /// @consider 'UniswapV2: PAIR_EXISTS' revert
+            parentAuthPool[address(this)] = Factory.createPair(_reliableERC20, address(this));
+            thirdToken = IERC20(_reliableERC20);        
         }
 
         if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
