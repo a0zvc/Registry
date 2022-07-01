@@ -8,7 +8,9 @@ interface IRegistry {
     /// @param _factory: UniV2 factory address
     /// @param _reliableERC20 third party ERC20 (DAI/USDC etc.) used for value determinations
     /// @param _tributeShare share of totalsupply as value contribution. 100 for 1%
-    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) external returns (address);
+    /// @param _reliableAmt sender approved amount to add as initial liquidity at pool formation
+    /// @param _a0zAmount amount to mint and add as initial liquidity at pool formation
+    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare,  uint256 _reliableAmt, uint256 _a0zAmount) external returns (address);
 
     /// @notice authorizes msg.sender as Deal constructor on the basis of configured conditions
     /// @param _parentToken ERC20 unit of Parent value. Will be paired with children tokens in LP nexus

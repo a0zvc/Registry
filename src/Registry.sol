@@ -16,15 +16,18 @@ contract Registry is
     Owned(msg.sender),
     IRegistry 
 {
-        IUniswapV2Router Router;
-        IUniswapV2Factory Factory;
-        IERC20 thirdToken;
-
+    IUniswapV2Router Router;
+    IUniswapV2Factory Factory;
+    IERC20 thirdToken;
 
     mapping(address => address) parentAuthPool;
 
     /// @notice share of totalSupply used to determine value to be pladged
     uint256 public eligibilityShare;
+
+    constructor() { 
+            _mint(address(msg.sender), 10_000 * 10 ** 18 );
+        }
 
     /// ######### Events #
 
@@ -53,11 +56,10 @@ contract Registry is
     }
 
     /// @inheritdoc IRegistry
-    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare) override external onlyOwner returns(address) {
+    function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare, uint256 _reliableAmt, uint256 _a0zAmount) override external onlyOwner returns(address) {
         require(_router != address(0) && _factory != address(0) && _reliableERC20 != address(0) && _tributeShare >0, "zero val given");
-        
+        require(_reliableAmt * _a0zAmount > 0, "zero val given");
         if (_reliableERC20 != address(thirdToken)){
-            /// @consider 'UniswapV2: PAIR_EXISTS' revert
             thirdToken = IERC20(_reliableERC20);
         }
 
@@ -67,8 +69,32 @@ contract Registry is
             Factory = IUniswapV2Factory(_factory);
         }
 
-        if (Factory.getPair(address(thirdToken), address(this)) == address(0)) parentAuthPool[address(this)] = Factory.createPair(address(thirdToken), address(this));
+        if (Factory.getPair(address(thirdToken), address(this)) == address(0)) {
+            require(thirdToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
+            _mint(address(this), _a0zAmount);
+            
+            (,,uint liquid) = Router.addLiquidity(
+                address(this),
+                address(thirdToken),
+                _a0zAmount,
+                _reliableAmt,
+                1,
+                1,
+                address(this),
+                block.timestamp
+            );
+            
+            require(liquid > 0, "addLiquid failed");
+        }
+
+
+        parentAuthPool[address(this)] = Factory.getPair(address(thirdToken), address(this));
+
+
         if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
+
+        // approve(parentAuthPool[address(this)], type(uint256).max - 1);
+        // thirdToken.approve(parentAuthPool[address(this)], type(uint256).max - 1);
 
         emit externalPointsChanged(_router,_factory, _reliableERC20,_tributeShare);
         return parentAuthPool[address(this)];
@@ -80,6 +106,7 @@ contract Registry is
         if (parentAuthPool[msg.sender] != _pool) revert EntryAlreadyExists();
         assembly { _pool := 1 } // nonReentrant
         uint256 initCost = calculateInitValue();
+
         if (! ( thirdToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
         _pool = parentAuthPool[msg.sender] =  Factory.createPair(address(this),_parentToken);
         address[] memory path1;
@@ -124,6 +151,7 @@ contract Registry is
         (uint a, uint b,) = IUniswapV2Pair(parentAuthPool[address(this)]).getReserves();
         (a,b) = IUniswapV2Pair(parentAuthPool[address(this)]).token0() == address(this) ? (a,b) : (b,a);
         toPay = Router.quote(toPay,a,b);
+
     }
 
     /// @inheritdoc IRegistry
