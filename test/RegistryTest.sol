@@ -4,30 +4,16 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 
 import "solmate/tokens/WETH.sol";
-import "solmate/tokens/ERC20.sol";
 import "uniswapv2-solc0.8/interfaces/IERC20.sol";
 import "uniswapv2-solc0.8/UniswapV2Router.sol";
 import "uniswapv2-solc0.8/UniswapV2Factory.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 
-
 import "../src/Registry.sol";
 
-contract DAOToken is ERC20("CommunityValueToken","CVT",18) {
+import "./mocks/THIRDt.sol";
+import "./mocks/DAOt.sol";
 
-    constructor(){
-        _mint(address(2),(1000 * 10 ** 18));
-
-    }
-}
-
-contract ThirdToken is ERC20("UniversalValueToken","UVT",18) {
-
-    constructor(){
-        _mint(address(2),(1000 * 10 ** 18));
-
-    }
-}
 contract RegistryTest is Test {
     
         WETH wETH;
@@ -42,21 +28,23 @@ contract RegistryTest is Test {
         address defaultForge = address(0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
 
     function setUp() public {
-
-        vm.startPrank(address(2));
+        
         wETH = new WETH();
+        owner = address(2);
+
+        vm.startPrank(owner);
         strongAndStable = new ThirdToken();
         DT = new DAOToken();
         
-        Factory = new UniswapV2Factory(address(2));
-        Factory.setFeeTo(address(2));
+        Factory = new UniswapV2Factory(owner);
+        Factory.setFeeTo(owner);
         Router = new UniswapV2Router(address(Factory), address(wETH));
 
         R = new Registry();
-        owner = address(2);
+
         vm.stopPrank();
 
-        // assertFalse(address(DT) == ttt); 
+        assertFalse(address(DT) == address(strongAndStable)); 
     }
 
     function testCannotUniinitialized() public {

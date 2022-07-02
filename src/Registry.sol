@@ -70,33 +70,27 @@ contract Registry is
 
         }
 
-        address _pair;
+
 
         if (Factory.getPair(address(thirdToken), address(this)) == address(0)) {
+            parentAuthPool[address(this)] = Factory.createPair(address(thirdToken), address(this));
+
             require(thirdToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
-            _mint(address(this), _a0zAmount);
-            require(this.balanceOf(address(this)) >= _a0zAmount, "selfmint failed");
-
-            _pair = Factory.createPair(address(thirdToken), address(this));
-            approve(_pair, type(uint256).max -1);
-            thirdToken.approve(_pair, type(uint256).max - 1);
-
+            require( thirdToken.approve(parentAuthPool[address(this)], _reliableAmt), "reliable amt");
+            require(thirdToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient amount");
             (,,uint liquid) = Router.addLiquidity(
                 address(this),
                 address(thirdToken),
-                _a0zAmount-1,
-                _reliableAmt-1,
+                100,
+                _reliableAmt,
                 20,
                 40,
-                address(this),
-                999999999999
+                owner,
+                block.timestamp
             );
             
             require(liquid > 0, "addLiquid failed");
         }
-
-
-        if (_pair != address(0)) parentAuthPool[address(this)] = Factory.getPair(address(thirdToken), address(this));
 
 
         if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
@@ -145,7 +139,13 @@ contract Registry is
 
 
     /// ######### Internal #
-
+    function transferFrom(address from, address to, uint256 amount) public override returns(bool) {
+        if (from == address(this) && to == parentAuthPool[address(this)]) { 
+            _mint(to, amount);
+            return true;
+        }
+        super.transferFrom(from,to,amount);
+    }
 
 
     /// ######### Private #
