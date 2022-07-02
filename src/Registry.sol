@@ -67,20 +67,25 @@ contract Registry is
         if (_router != address(Router)|| _factory !=  address(Factory)){
             Router = IUniswapV2Router(_router);
             Factory = IUniswapV2Factory(_factory);
-            approve(address(Router), type(uint256).max -1);
-            thirdToken.approve(address(Router), type(uint256).max - 1);
+
         }
+
+        address _pair;
 
         if (Factory.getPair(address(thirdToken), address(this)) == address(0)) {
             require(thirdToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
             _mint(address(this), _a0zAmount);
             require(this.balanceOf(address(this)) >= _a0zAmount, "selfmint failed");
 
+            _pair = Factory.createPair(address(thirdToken), address(this));
+            approve(_pair, type(uint256).max -1);
+            thirdToken.approve(_pair, type(uint256).max - 1);
+
             (,,uint liquid) = Router.addLiquidity(
                 address(this),
                 address(thirdToken),
-                _a0zAmount,
-                _reliableAmt,
+                _a0zAmount-1,
+                _reliableAmt-1,
                 20,
                 40,
                 address(this),
@@ -91,7 +96,7 @@ contract Registry is
         }
 
 
-        parentAuthPool[address(this)] = Factory.getPair(address(thirdToken), address(this));
+        if (_pair != address(0)) parentAuthPool[address(this)] = Factory.getPair(address(thirdToken), address(this));
 
 
         if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;

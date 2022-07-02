@@ -13,13 +13,13 @@ import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 
 import "../src/Registry.sol";
 
-// contract DAOToken is ERC20("CommunityValueToken","CVT",18) {
+contract DAOToken is ERC20("CommunityValueToken","CVT",18) {
 
-//     constructor(){
-//         _mint(address(2),(1000 * 10 ** 18));
+    constructor(){
+        _mint(address(2),(1000 * 10 ** 18));
 
-//     }
-// }
+    }
+}
 
 contract ThirdToken is ERC20("UniversalValueToken","UVT",18) {
 
@@ -31,27 +31,29 @@ contract ThirdToken is ERC20("UniversalValueToken","UVT",18) {
 contract RegistryTest is Test {
     
         WETH wETH;
-        ThirdToken strongAndStable = new ThirdToken();
-        address ttt = address(strongAndStable);
+        ThirdToken strongAndStable;
+        DAOToken DT;
+
         UniswapV2Factory Factory;
         UniswapV2Router Router;
-
         Registry R;
+
         address owner;
-        // DAOToken DT = new DAOToken();
         address defaultForge = address(0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
 
     function setUp() public {
-        vm.prank(address(5));
-        wETH = new WETH();
+
         vm.startPrank(address(2));
+        wETH = new WETH();
+        strongAndStable = new ThirdToken();
+        DT = new DAOToken();
+        
         Factory = new UniswapV2Factory(address(2));
         Factory.setFeeTo(address(2));
         Router = new UniswapV2Router(address(Factory), address(wETH));
 
         R = new Registry();
         owner = address(2);
-        R.transfer(address(5), R.totalSupply());
         vm.stopPrank();
 
         // assertFalse(address(DT) == ttt); 
@@ -95,7 +97,7 @@ contract RegistryTest is Test {
     function testInitialize() public {
 
         /// test can initialize via setExternalPoints
-        uint256 SS5 = IERC20(ttt).balanceOf(owner);
+        uint256 SS5 = strongAndStable.balanceOf(owner);
         uint256 AZ5 = 200 * 10 ** 18;
         console.log("SS5 ", SS5, " AZ5 ", AZ5);
 
@@ -107,10 +109,10 @@ contract RegistryTest is Test {
         // IERC20(address(R)).transfer(owner, AZ5);
         // vm.stopPrank();
         vm.prank(owner);
-        IERC20(ttt).approve(address(R), type(uint256).max-1);
-        console.log("ttt  - " , ttt );
+        strongAndStable.approve(address(R), type(uint256).max-1);
+
         vm.prank(owner);
-        address p = R.setExternalPoints(address(Router), address(Factory), ttt, 100, SS5, AZ5 );
+        address p = R.setExternalPoints(address(Router), address(Factory), address(strongAndStable), 100, SS5, AZ5 );
         IUniswapV2Pair pool = IUniswapV2Pair(p);
 
         assertFalse(address(pool) == address(0), "failed on pool address is 0");
