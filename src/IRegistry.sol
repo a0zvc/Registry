@@ -22,7 +22,7 @@ interface IRegistry {
     function getParentPool(address _OfSender) external view returns (address);
 
     /// @notice returns the address of third token
-    function thirdTokenAddress() external view returns (address);
+    function opTokenAddress() external view returns (address);
 
     /// @notice returns minimum amount of thirdToken() needed to be approved for selfRegister()
     function calculateInitValue() external view returns (uint256);

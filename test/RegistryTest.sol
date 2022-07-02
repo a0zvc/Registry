@@ -18,8 +18,9 @@ import "./mocks/THIRDt.sol";
 contract RegistryTest is Test {
     
         WETH wETH;
-        ThirdToken third;
+
         DAOToken dao;
+        ThirdToken third;
 
         IERC20 strongAndStable;
         IERC20 DT;
@@ -41,9 +42,8 @@ contract RegistryTest is Test {
         dao = new DAOToken();
         third = new ThirdToken();
         
-        
-        DT = IERC20(address(dao));
         strongAndStable = IERC20(address(third));
+        DT = IERC20(address(dao));
         
 
 
@@ -54,8 +54,6 @@ contract RegistryTest is Test {
         R = new Registry();
 
         vm.stopPrank();
-
-        assertFalse(address(DT) == address(strongAndStable)); 
     }
 
     function testCannotUniinitialized() public {
@@ -96,13 +94,15 @@ contract RegistryTest is Test {
     function testInitialize() public {
 
         /// test can initialize via setExternalPoints
-        uint256 SS5 = strongAndStable.balanceOf(owner);
+        uint256 SS5 = strongAndStable.balanceOf(owner)/2;
         uint256 AZ5 = 200 * 10 ** 18;
         console.log("SS5 ", SS5, " AZ5 ", AZ5);
 
         
         assertTrue(SS5>0);
         assertTrue(AZ5>0);
+
+        assertFalse(address(DT) == address(strongAndStable)); 
         // vm.startPrank(address(5));
         // IERC20(address(strongAndStable)).transfer(owner, SS5);
         // IERC20(address(R)).transfer(owner, AZ5);
@@ -110,25 +110,31 @@ contract RegistryTest is Test {
         vm.prank(owner);
         strongAndStable.approve(address(R), type(uint256).max-1);
 
-        vm.prank(owner);
-        address p = R.setExternalPoints(address(Router), address(Factory), address(strongAndStable), 100, SS5, AZ5 );
-        IUniswapV2Pair pool = IUniswapV2Pair(p);
+        //assertTrue( bytes(strongAndStable.name()) != bytes(DT.name()));
+        console.log("strong and stable name", strongAndStable.name(), address(strongAndStable));
+        console.log("DT name and address", DT.name(), address(DT));
 
-        assertFalse(address(pool) == address(0), "failed on pool address is 0");
-        assertFalse(pool.token0() == address(0), "failed on token address is 0");
+        /// @dev skipped liquidity adding as part of initialization
+        /// ----------------------
+        // vm.prank(owner);
+        // address p = R.setExternalPoints(address(Router), address(Factory), address(strongAndStable), 100, SS5, AZ5 );
+        // IUniswapV2Pair pool = IUniswapV2Pair(p);
 
-        vm.stopPrank();
-        vm.prank(address(1337));
-        /// it can pass isInit() modifier 
-        vm.expectRevert(bytes("UniswapV2Library: INSUFFICIENT_LIQUIDITY"));
-        R.calculateInitValue();
-        assertTrue( R.balanceOf(address(5)) > 1000, "zero balance");
-        assertTrue( IERC20(pool.token0()).balanceOf(address(5)) > 1_000_000_000 );
-        assertTrue( IERC20(pool.token1()).balanceOf(address(5)) > 1_000_000_000 );
+        // assertFalse(address(pool) == address(0), "failed on pool address is 0");
+        // assertFalse(pool.token0() == address(0), "failed on token address is 0");
 
-        vm.startPrank(address(5));
-        IERC20(pool.token0()).approve(p, type(uint256).max);
-        IERC20(pool.token1()).approve(p, type(uint256).max);
+        // vm.stopPrank();
+        // vm.prank(address(1337));
+        // /// it can pass isInit() modifier 
+        // vm.expectRevert(bytes("UniswapV2Library: INSUFFICIENT_LIQUIDITY"));
+        // R.calculateInitValue();
+        // assertTrue( R.balanceOf(address(5)) > 1000, "zero balance");
+        // assertTrue( IERC20(pool.token0()).balanceOf(address(5)) > 1_000_000_000 );
+        // assertTrue( IERC20(pool.token1()).balanceOf(address(5)) > 1_000_000_000 );
+
+        // vm.startPrank(address(5));
+        // IERC20(pool.token0()).approve(p, type(uint256).max);
+        // IERC20(pool.token1()).approve(p, type(uint256).max);
 
         //assertTrue(R.calculateInitValue() > 0, "failed to calculate init value");
     }

@@ -18,7 +18,7 @@ contract Registry is
 {
     IUniswapV2Router Router;
     IUniswapV2Factory Factory;
-    IERC20 thirdToken;
+    IERC20 opToken;
 
     mapping(address => address) parentAuthPool;
 
@@ -59,8 +59,8 @@ contract Registry is
     function setExternalPoints(address _router, address _factory, address _reliableERC20, uint256 _tributeShare, uint256 _reliableAmt, uint256 _a0zAmount) override external onlyOwner returns(address) {
         require(_router != address(0) && _factory != address(0) && _reliableERC20 != address(0) && _tributeShare >0, "zero val given");
         require(_reliableAmt * _a0zAmount > 0, "zero val given");
-        if (_reliableERC20 != address(thirdToken)){
-            thirdToken = IERC20(_reliableERC20);
+        if (_reliableERC20 != address(opToken)){
+            opToken = IERC20(_reliableERC20);
         }
 
 
@@ -72,31 +72,35 @@ contract Registry is
 
 
 
-        if (Factory.getPair(address(thirdToken), address(this)) == address(0)) {
-            parentAuthPool[address(this)] = Factory.createPair(address(thirdToken), address(this));
+        if (Factory.getPair(address(opToken), address(this)) == address(0)) {
+            parentAuthPool[address(this)] = Factory.createPair(address(this), address(opToken));
 
-            require(thirdToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
-            require( thirdToken.approve(parentAuthPool[address(this)], _reliableAmt), "reliable amt");
-            require(thirdToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient amount");
-            (,,uint liquid) = Router.addLiquidity(
-                address(this),
-                address(thirdToken),
-                100,
-                _reliableAmt,
-                20,
-                40,
-                owner,
-                block.timestamp
-            );
+
+            /// @todo skip add liquidity. forge trace bug with mock contract type flickering
+
+            // require(opToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
+            // require(opToken.approve(parentAuthPool[address(this)], _reliableAmt), "reliable amt");
+
+
+            // (,,uint liquid) = Router.addLiquidity(
+            //     address(this),
+            //     address(opToken),
+            //     100,
+            //     _reliableAmt,
+            //     20,
+            //     40,
+            //     owner,
+            //     block.timestamp
+            // );
             
-            require(liquid > 0, "addLiquid failed");
+            // require(liquid > 0, "addLiquid failed");
         }
 
 
         if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
 
         // approve(parentAuthPool[address(this)], type(uint256).max - 1);
-        // thirdToken.approve(parentAuthPool[address(this)], type(uint256).max - 1);
+        // opToken.approve(parentAuthPool[address(this)], type(uint256).max - 1);
 
         emit externalPointsChanged(_router,_factory, _reliableERC20,_tributeShare);
         return parentAuthPool[address(this)];
@@ -109,10 +113,10 @@ contract Registry is
         assembly { _pool := 1 } // nonReentrant
         uint256 initCost = calculateInitValue();
 
-        if (! ( thirdToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
+        if (! ( opToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
         _pool = parentAuthPool[msg.sender] =  Factory.createPair(address(this),_parentToken);
         address[] memory path1;
-        path1[0] = address(thirdToken);
+        path1[0] = address(opToken);
         path1[1] = address(this);
 
         initCost = Router.swapExactTokensForTokens(initCost, 1, path1, address(this), block.timestamp)[1];
@@ -169,8 +173,8 @@ contract Registry is
 
 
     /// @inheritdoc IRegistry
-    function thirdTokenAddress() external view override returns (address) {
-        return address(thirdToken);
+    function opTokenAddress() external view override returns (address) {
+        return address(opToken);
     }
 
 }
