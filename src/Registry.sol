@@ -1,6 +1,6 @@
 pragma solidity >=0.8.0;
 
-import "solmate/tokens/ERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "solmate/auth/Owned.sol";
 
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Router.sol";
@@ -8,17 +8,17 @@ import "uniswapv2-solc0.8/interfaces/IUniswapV2Factory.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 // import "uniswapv2-solc0.8/contracts/interfaces/IUniswapV2Pair.sol";
 
-import "uniswapv2-solc0.8/interfaces/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IRegistry.sol";
 
 contract Registry is 
-    ERC20("A0Z.VC", "A0Z", 18),
+    ERC20("A0Z.VC", "A0Z"),
     Owned(msg.sender),
     IRegistry 
-{
+{   
+    IERC20 opToken;
     IUniswapV2Router Router;
     IUniswapV2Factory Factory;
-    IERC20 opToken;
 
     mapping(address => address) parentAuthPool;
 
@@ -159,7 +159,7 @@ contract Registry is
 
 
     function calculateInitValue() public view override isInit returns (uint256 toPay) {
-        toPay = totalSupply / eligibilityShare;
+        toPay = totalSupply() / eligibilityShare;
         (uint a, uint b,) = IUniswapV2Pair(parentAuthPool[address(this)]).getReserves();
         (a,b) = IUniswapV2Pair(parentAuthPool[address(this)]).token0() == address(this) ? (a,b) : (b,a);
         toPay = Router.quote(toPay,a,b);

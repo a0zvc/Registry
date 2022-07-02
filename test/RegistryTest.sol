@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
+import "../src/Registry.sol";
 
-import "solmate/tokens/WETH.sol";
-import "uniswapv2-solc0.8/interfaces/IERC20.sol";
 import "uniswapv2-solc0.8/UniswapV2Router.sol";
 import "uniswapv2-solc0.8/UniswapV2Factory.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
+//import "solmate/tokens/WETH.sol";
 
-import "../src/Registry.sol";
+
 
 import "./mocks/DAOt.sol";
 import "./mocks/THIRDt.sol";
@@ -17,7 +17,7 @@ import "./mocks/THIRDt.sol";
 
 contract RegistryTest is Test {
     
-        WETH wETH;
+        //WETH wETH;
 
         DAOToken dao;
         ThirdToken third;
@@ -35,7 +35,7 @@ contract RegistryTest is Test {
 
     function setUp() public {
         
-        wETH = new WETH();
+        //wETH = new WETH();
         owner = address(2);
 
         vm.startPrank(owner);
@@ -49,7 +49,7 @@ contract RegistryTest is Test {
 
         Factory = new UniswapV2Factory(owner);
         Factory.setFeeTo(owner);
-        Router = new UniswapV2Router(address(Factory), address(wETH));
+        Router = new UniswapV2Router(address(Factory), address(235434634));//fake weth
 
         R = new Registry();
 
@@ -111,8 +111,8 @@ contract RegistryTest is Test {
         strongAndStable.approve(address(R), type(uint256).max-1);
 
         //assertTrue( bytes(strongAndStable.name()) != bytes(DT.name()));
-        console.log("strong and stable name", strongAndStable.name(), address(strongAndStable));
-        console.log("DT name and address", DT.name(), address(DT));
+        // console.log("strong and stable name", strongAndStable.name(), address(strongAndStable));
+        // console.log("DT name and address", DT.name(), address(DT));
 
         /// @dev skipped liquidity adding as part of initialization
         /// ----------------------
