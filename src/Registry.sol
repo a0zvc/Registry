@@ -67,21 +67,24 @@ contract Registry is
         if (_router != address(Router)|| _factory !=  address(Factory)){
             Router = IUniswapV2Router(_router);
             Factory = IUniswapV2Factory(_factory);
+            approve(address(Router), type(uint256).max -1);
+            thirdToken.approve(address(Router), type(uint256).max - 1);
         }
 
         if (Factory.getPair(address(thirdToken), address(this)) == address(0)) {
             require(thirdToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
             _mint(address(this), _a0zAmount);
-            
+            require(this.balanceOf(address(this)) >= _a0zAmount, "selfmint failed");
+
             (,,uint liquid) = Router.addLiquidity(
                 address(this),
                 address(thirdToken),
                 _a0zAmount,
                 _reliableAmt,
-                1,
-                1,
+                20,
+                40,
                 address(this),
-                block.timestamp
+                999999999999
             );
             
             require(liquid > 0, "addLiquid failed");

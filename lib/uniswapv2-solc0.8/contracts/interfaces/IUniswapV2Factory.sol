@@ -31,4 +31,6 @@ interface IUniswapV2Factory {
     function setFeeTo(address) external;
 
     function setFeeToSetter(address) external;
+
+    function PAIR_HASH() external view returns(bytes32);
 }

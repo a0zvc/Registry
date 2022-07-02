@@ -13,13 +13,13 @@ import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 
 import "../src/Registry.sol";
 
-contract DAOToken is ERC20("CommunityValueToken","CVT",18) {
+// contract DAOToken is ERC20("CommunityValueToken","CVT",18) {
 
-    constructor(){
-        _mint(address(2),(1000 * 10 ** 18));
+//     constructor(){
+//         _mint(address(2),(1000 * 10 ** 18));
 
-    }
-}
+//     }
+// }
 
 contract ThirdToken is ERC20("UniversalValueToken","UVT",18) {
 
@@ -38,7 +38,7 @@ contract RegistryTest is Test {
 
         Registry R;
         address owner;
-        DAOToken DT = new DAOToken();
+        // DAOToken DT = new DAOToken();
         address defaultForge = address(0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
 
     function setUp() public {
@@ -54,15 +54,15 @@ contract RegistryTest is Test {
         R.transfer(address(5), R.totalSupply());
         vm.stopPrank();
 
-        assertFalse(address(DT) == ttt); 
+        // assertFalse(address(DT) == ttt); 
     }
 
     function testCannotUniinitialized() public {
         /// tests functions revert due to global uniinitialized state 
         vm.expectRevert(bytes("PausedOrUninitialized"));
-        vm.prank(address(3));
-        R.selfRegister(address(DT));
-        vm.expectRevert(bytes("PausedOrUninitialized"));
+        // vm.prank(address(3));
+        // R.selfRegister(address(DT));
+        // vm.expectRevert(bytes("PausedOrUninitialized"));
         vm.prank(address(4));
         R.calculateInitValue();
     }
@@ -108,14 +108,16 @@ contract RegistryTest is Test {
         // vm.stopPrank();
         vm.prank(owner);
         IERC20(ttt).approve(address(R), type(uint256).max-1);
+        console.log("ttt  - " , ttt );
         vm.prank(owner);
         address p = R.setExternalPoints(address(Router), address(Factory), ttt, 100, SS5, AZ5 );
         IUniswapV2Pair pool = IUniswapV2Pair(p);
 
         assertFalse(address(pool) == address(0), "failed on pool address is 0");
         assertFalse(pool.token0() == address(0), "failed on token address is 0");
-        vm.prank(address(1337));
 
+        vm.stopPrank();
+        vm.prank(address(1337));
         /// it can pass isInit() modifier 
         vm.expectRevert(bytes("UniswapV2Library: INSUFFICIENT_LIQUIDITY"));
         R.calculateInitValue();
