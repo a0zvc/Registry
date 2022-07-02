@@ -11,18 +11,23 @@ import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 
 import "../src/Registry.sol";
 
-import "./mocks/THIRDt.sol";
 import "./mocks/DAOt.sol";
+import "./mocks/THIRDt.sol";
+
 
 contract RegistryTest is Test {
     
         WETH wETH;
-        ThirdToken strongAndStable;
-        DAOToken DT;
+        ThirdToken third;
+        DAOToken dao;
+
+        IERC20 strongAndStable;
+        IERC20 DT;
 
         UniswapV2Factory Factory;
         UniswapV2Router Router;
         Registry R;
+
 
         address owner;
         address defaultForge = address(0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
@@ -33,9 +38,15 @@ contract RegistryTest is Test {
         owner = address(2);
 
         vm.startPrank(owner);
-        strongAndStable = new ThirdToken();
-        DT = new DAOToken();
+        dao = new DAOToken();
+        third = new ThirdToken();
         
+        
+        DT = IERC20(address(dao));
+        strongAndStable = IERC20(address(third));
+        
+
+
         Factory = new UniswapV2Factory(owner);
         Factory.setFeeTo(owner);
         Router = new UniswapV2Router(address(Factory), address(wETH));
