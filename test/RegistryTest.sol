@@ -120,7 +120,6 @@ contract RegistryTest is Test {
         address opTokenAddress = R.opTokenAddress();
         assertTrue(pool.token0() == opTokenAddress || pool.token1() == opTokenAddress, "opaddress not in mainpool");
 
-        createDT_OP();
     }
     /// @dev @todo add fuzzing to liquidity nubers and pricing
     function createDT_OP() public {
@@ -184,15 +183,21 @@ contract RegistryTest is Test {
         DT.approve(address(R), MAX_UINT);
         vm.prank(address(1337));
         strongAndStable.approve(address(R), MAX_UINT);
-        testInitialize();
         
-        vm.startPrank(address(1337));
-        vm.expectRevert("provided&OP lp pool:not found");
-        address pool = R.selfRegister(address(DT));
+        testInitialize();
 
-        // assertTrue(pool != address(0));
-        // assertTrue(pool == R.getParentPool(address(DT)));
-        // assertTrue(pool != R.getParentPool(address(R)));
+        vm.expectRevert("provided&OP lp pool:not found");
+        vm.prank(address(1337));
+        address pool = R.selfRegister(address(DT));
+        createDT_OP();
+        vm.startPrank(address(1337));
+        pool = R.selfRegister(address(DT));
+
+        assertTrue(pool != address(0));
+        assertTrue(address(0) != R.getParentPool(address(R)));
+        assertTrue(pool == R.getParentPool(address(DT)));
+        assertTrue(pool != R.getParentPool(address(R)));
+
     
         vm.stopPrank();
     }

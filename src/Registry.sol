@@ -69,17 +69,15 @@ contract Registry is
         }
 
 
+
         if (Factory.getPair(address(opToken), address(this)) == address(0)) {
 
             parentAuthPool[address(this)] = Factory.createPair(address(this), address(opToken));
 
             require(opToken.transferFrom(msg.sender, address(this),_reliableAmt), "transfer failed");
             require(opToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient _reliable balance");
-
-            require(opToken.approve(parentAuthPool[address(this)], _reliableAmt), "reliable amt");
-            require(opToken.approve(address(Router), _reliableAmt), "reliable amt");
-
-            _mint(address(this), _a0zAmount);
+          
+            require(opToken.approve(address(Router), MAX_UINT), "reliable amt");
             this.approve(parentAuthPool[address(this)],MAX_UINT);
 
 
@@ -89,7 +87,7 @@ contract Registry is
                 _a0zAmount,
                 _reliableAmt,
                 3000,
-                6000,
+                6000, 
                 owner,
                 block.timestamp
             );
@@ -124,9 +122,7 @@ contract Registry is
         _pool = parentAuthPool[_parentToken] =  Factory.createPair(address(this),_parentToken);
         require(_pool != address(0), "poolCreateFail");
         
-        require( IERC20(opToken).approve(address(Router), MAX_UINT) );
         require( IERC20(_parentToken).approve(address(Router), MAX_UINT) );
-
 
         address[] memory path1 = new address[](2);
         path1[0] = address(opToken);
@@ -135,14 +131,12 @@ contract Registry is
         initCost = Router.swapExactTokensForTokens(initCost-2, 1, path1, address(this), block.timestamp +1)[1];
 
 
-
         require( IERC20(opToken).approve(address(Router), MAX_UINT) );
-
         path1[1] = _parentToken;
-
         uint _parentAmout = Router.swapExactTokensForTokens( IERC20(opToken).balanceOf(address(this)), 1, path1, address(this), block.timestamp + 1)[1];
 
-        approve(address(Router), MAX_UINT);
+        this.approve(address(Router), MAX_UINT); //interesting
+
         /// @dev consider removing liquidity add in same opperation
         (,,uint liquidity) = Router.addLiquidity(
             _parentToken,
@@ -157,7 +151,7 @@ contract Registry is
 
         require( liquidity > 1, "SelfRegister Failed");
         
-        _mint(msg.sender, initCost);
+        _mint(msg.sender, initCost); /// @todo tbd
 
         emit selfRegistered(_parentToken, parentAuthPool[_pool], msg.sender);
     }
