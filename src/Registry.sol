@@ -109,7 +109,6 @@ contract Registry is
     /// @inheritdoc IRegistry
     function selfRegister(address _parentToken) override external isInit returns (address _pool) {
         if (parentAuthPool[_parentToken] != _pool) revert EntryAlreadyExists();
-        assembly { _pool := 1 } // nonReentrant
         uint256 initCost = calculateInitValue();
 
         address opParentPool = Factory.getPair(_parentToken, address(opToken));
