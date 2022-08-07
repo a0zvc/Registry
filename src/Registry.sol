@@ -100,8 +100,6 @@ contract Registry is
 
         if (_tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
 
-        // approve(parentAuthPool[address(this)], type(uint256).max - 1);
-        // opToken.approve(parentAuthPool[address(this)], type(uint256).max - 1);
         emit externalPointsChanged(address(Router), address(Factory), address(opToken), eligibilityShare);
         return parentAuthPool[address(this)];
     }
@@ -134,9 +132,8 @@ contract Registry is
         path1[1] = _parentToken;
         uint _parentAmout = Router.swapExactTokensForTokens( IERC20(opToken).balanceOf(address(this)), 1, path1, address(this), block.timestamp + 1)[1];
 
-        this.approve(address(Router), MAX_UINT); //interesting
+        this.approve(address(Router), MAX_UINT); 
 
-        /// @dev consider removing liquidity add in same opperation
         (,,uint liquidity) = Router.addLiquidity(
             _parentToken,
             address(this),
