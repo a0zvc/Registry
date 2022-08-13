@@ -6,7 +6,8 @@ import "./interfaces/IUniswapV2Pair.sol";
 import "./UniswapV2ERC20.sol";
 import "./libraries/Math.sol";
 import "./libraries/UQ112x112.sol";
-import "./interfaces/IERC20.sol";
+// import "./interfaces/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapV2Callee.sol";
 
@@ -222,7 +223,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
             // scope for _token{0,1}, avoids stack too deep errors
             address _token0 = token0;
             address _token1 = token1;
-            require(to != _token0 && to != _token1, "UniswapV2: INVALID_TO");
+            //require(to != _token0 && to != _token1, "UniswapV2: INVALID_TO");
             if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
             if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
             if (data.length > 0)

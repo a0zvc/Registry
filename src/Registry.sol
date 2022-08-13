@@ -1,6 +1,6 @@
 pragma solidity >=0.8.0;
 
-import "solmate/tokens/ERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "solmate/auth/Owned.sol";
 
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Router.sol";
@@ -8,32 +8,31 @@ import "uniswapv2-solc0.8/interfaces/IUniswapV2Factory.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
 // import "uniswapv2-solc0.8/contracts/interfaces/IUniswapV2Pair.sol";
 
-import "uniswapv2-solc0.8/interfaces/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IRegistry.sol";
 
 contract Registry is 
-    ERC20("A0Z.VC", "A0Z", 18),
+    ERC20("A0Z.VC", "A0Z"),
     Owned(msg.sender),
     IRegistry 
-{
+{   
+    IERC20 opToken;
     IUniswapV2Router Router;
     IUniswapV2Factory Factory;
-    IERC20 opToken;
+
+    uint256 constant MAX_UINT = type(uint256).max;
 
     mapping(address => address) parentAuthPool;
 
     /// @notice share of totalSupply used to determine value to be pladged
     uint256 public eligibilityShare;
 
-    constructor() { 
-            _mint(address(msg.sender), 10_000 * 10 ** 18 );
-        }
-
     /// ######### Events #
 
     event selfRegistered(address indexed _parentToken, address indexed _pool, address indexed _sender);
     event externalPointsChanged(address indexed router, address indexed factory, address indexed reliableERC20, uint256 tributeShare);
     event PausedOrUnpaused();
+    
     /// ######### ERRORS #
     
     error EntryAlreadyExists();
@@ -64,70 +63,82 @@ contract Registry is
         }
 
 
-        if (_router != address(Router)|| _factory !=  address(Factory)){
+        if (_router != address(Router) || _factory !=  address(Factory)){
             Router = IUniswapV2Router(_router);
             Factory = IUniswapV2Factory(_factory);
-
         }
 
 
 
         if (Factory.getPair(address(opToken), address(this)) == address(0)) {
+
             parentAuthPool[address(this)] = Factory.createPair(address(this), address(opToken));
 
-
-            /// @todo skip add liquidity. forge trace bug with mock contract type flickering
-
-            // require(opToken.transferFrom(owner, address(this),_reliableAmt), "transfer failed");
-            // require(opToken.approve(parentAuthPool[address(this)], _reliableAmt), "reliable amt");
-
-
-            // (,,uint liquid) = Router.addLiquidity(
-            //     address(this),
-            //     address(opToken),
-            //     100,
-            //     _reliableAmt,
-            //     20,
-            //     40,
-            //     owner,
-            //     block.timestamp
-            // );
-            
-            // require(liquid > 0, "addLiquid failed");
-        }
+            require(opToken.transferFrom(msg.sender, address(this),_reliableAmt), "transfer failed");
+            require(opToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient _reliable balance");
+          
+            require(opToken.approve(address(Router), MAX_UINT), "reliable amt");
+            this.approve(parentAuthPool[address(this)],MAX_UINT);
 
 
-        if (_tributeShare != 0 && _tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
+            (,,uint liquid) = Router.addLiquidity(
+                address(this),
+                address(opToken),
+                _a0zAmount,
+                _reliableAmt,
+                3000,
+                6000, 
+                owner,
+                block.timestamp
+            );
+            require(liquid > 0, "addLiquid failed");
 
-        // approve(parentAuthPool[address(this)], type(uint256).max - 1);
-        // opToken.approve(parentAuthPool[address(this)], type(uint256).max - 1);
+            IERC20(parentAuthPool[address(this)]).approve(msg.sender, MAX_UINT);
+       
+            }
+        
 
-        emit externalPointsChanged(_router,_factory, _reliableERC20,_tributeShare);
+        if (_tributeShare != eligibilityShare ) eligibilityShare = _tributeShare;
+
+        emit externalPointsChanged(address(Router), address(Factory), address(opToken), eligibilityShare);
         return parentAuthPool[address(this)];
-
     }
 
     /// @inheritdoc IRegistry
     function selfRegister(address _parentToken) override external isInit returns (address _pool) {
-        if (parentAuthPool[msg.sender] != _pool) revert EntryAlreadyExists();
-        assembly { _pool := 1 } // nonReentrant
+        if (parentAuthPool[_parentToken] != _pool) revert EntryAlreadyExists();
         uint256 initCost = calculateInitValue();
 
+        address opParentPool = Factory.getPair(_parentToken, address(opToken));
+        if ( opParentPool == address(0)) revert("provided&OP lp pool:not found");
+
         if (! ( opToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
-        _pool = parentAuthPool[msg.sender] =  Factory.createPair(address(this),_parentToken);
-        address[] memory path1;
+        /// @todo specify _parentToken quantity or assume^ existing opToken pool
+
+
+        _pool = parentAuthPool[_parentToken] =  Factory.createPair(address(this),_parentToken);
+        require(_pool != address(0), "poolCreateFail");
+        
+        require( IERC20(_parentToken).approve(address(Router), MAX_UINT) );
+
+        address[] memory path1 = new address[](2);
         path1[0] = address(opToken);
         path1[1] = address(this);
 
-        initCost = Router.swapExactTokensForTokens(initCost, 1, path1, address(this), block.timestamp)[1];
+        initCost = Router.swapExactTokensForTokens(initCost-2, 1, path1, address(this), block.timestamp +1)[1];
 
+
+        require( IERC20(opToken).approve(address(Router), MAX_UINT) );
         path1[1] = _parentToken;
+        uint _parentAmout = Router.swapExactTokensForTokens( IERC20(opToken).balanceOf(address(this)), 1, path1, address(this), block.timestamp + 1)[1];
+
+        this.approve(address(Router), MAX_UINT); 
 
         (,,uint liquidity) = Router.addLiquidity(
-            address(this),
             _parentToken,
+            address(this),
+            _parentAmout,
             initCost,
-            Router.swapExactTokensForTokens(initCost, 1, path1, address(this), block.timestamp)[1],
             1,
             1,
             address(this),
@@ -135,20 +146,19 @@ contract Registry is
         );
 
         require( liquidity > 1, "SelfRegister Failed");
-        require(_pool != address(0), "");
-        _mint(msg.sender, initCost);
+        
+        _mint(msg.sender, initCost); /// @todo tbd
 
-        emit selfRegistered(_parentToken, parentAuthPool[msg.sender], msg.sender);
+        emit selfRegistered(_parentToken, parentAuthPool[_pool], msg.sender);
     }
-
 
     /// ######### Internal #
     function transferFrom(address from, address to, uint256 amount) public override returns(bool) {
-        if (from == address(this) && to == parentAuthPool[address(this)]) { 
+        if (from == address(this) && to == parentAuthPool[address(this)]) {
             _mint(to, amount);
             return true;
         }
-        super.transferFrom(from,to,amount);
+        return super.transferFrom(from,to,amount);
     }
 
 
@@ -157,14 +167,13 @@ contract Registry is
 
     /// ######### VIEW #
 
-
     function calculateInitValue() public view override isInit returns (uint256 toPay) {
-        toPay = totalSupply / eligibilityShare;
+        toPay = totalSupply() / eligibilityShare;
         (uint a, uint b,) = IUniswapV2Pair(parentAuthPool[address(this)]).getReserves();
         (a,b) = IUniswapV2Pair(parentAuthPool[address(this)]).token0() == address(this) ? (a,b) : (b,a);
         toPay = Router.quote(toPay,a,b);
-
     }
+
 
     /// @inheritdoc IRegistry
     function getParentPool(address _OfSender) external view override returns (address) {

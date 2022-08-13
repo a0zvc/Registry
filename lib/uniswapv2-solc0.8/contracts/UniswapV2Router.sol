@@ -11,7 +11,8 @@ import "./libraries/TransferHelper.sol";
 
 import "./interfaces/IUniswapV2Router.sol";
 import "./libraries/UniswapV2Library.sol";
-import "./interfaces/IERC20.sol";
+// import "./interfaces/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IWETH.sol";
 
 contract UniswapV2Router is IUniswapV2Router {
