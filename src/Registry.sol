@@ -6,10 +6,15 @@ import "solmate/auth/Owned.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Router.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Factory.sol";
 import "uniswapv2-solc0.8/interfaces/IUniswapV2Pair.sol";
-// import "uniswapv2-solc0.8/contracts/interfaces/IUniswapV2Pair.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IRegistry.sol";
+
+/// @title A0Z.VC Deal Registry
+/// @author parseb (https://github.com/a0zvc/Registry/blob/main/src/Registry.sol)
+/// @notice authonomous liqudity and venture bootstrapping protocol
+/// @dev Experimental. Do not use.
+/// @custom:security contact: petra306@protonmail.com
 
 contract Registry is 
     ERC20("A0Z.VC", "A0Z"),
