@@ -32,7 +32,7 @@ contract Registry is
     event selfRegistered(address indexed _parentToken, address indexed _pool, address indexed _sender);
     event externalPointsChanged(address indexed router, address indexed factory, address indexed reliableERC20, uint256 tributeShare);
     event PausedOrUnpaused();
-    
+    event BaseLiquidPoolInit(address indexed basePool, address indexed owner, uint lptokenAmount);
     /// ######### ERRORS #
     
     error EntryAlreadyExists();
@@ -75,7 +75,7 @@ contract Registry is
             parentAuthPool[address(this)] = Factory.createPair(address(this), address(opToken));
 
             require(opToken.transferFrom(msg.sender, address(this),_reliableAmt), "transfer failed");
-            require(opToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient _reliable balance");
+            require(opToken.balanceOf(address(this)) >= _reliableAmt, "inssuficient _reliable balance"); //@dev necessary?
           
             require(opToken.approve(address(Router), MAX_UINT), "reliable amt");
             this.approve(parentAuthPool[address(this)],MAX_UINT);
@@ -86,15 +86,16 @@ contract Registry is
                 address(opToken),
                 _a0zAmount,
                 _reliableAmt,
-                3000,
-                6000, 
+                _a0zAmount,
+                _reliableAmt, 
                 owner,
                 block.timestamp
             );
             require(liquid > 0, "addLiquid failed");
 
             IERC20(parentAuthPool[address(this)]).approve(msg.sender, MAX_UINT);
-       
+
+            emit BaseLiquidPoolInit(parentAuthPool[address(this)], owner, IUniswapV2Pair(parentAuthPool[address(this)]).balanceOf(owner));
             }
         
 
