@@ -26,4 +26,12 @@ interface IRegistry {
 
     /// @notice returns minimum amount of thirdToken() needed to be approved for selfRegister()
     function calculateInitValue() external view returns (uint256);
+
+    /// @notice checks if a token address is registered -> has successfully self-registered
+    /// @param _token address of ERC20 to be checked if registered
+    function isRegistered(address _token) external view returns (bool);
+
+    /// @notice gets address of current owner
+    /// @dev from Ownable
+    function owner() external view returns (address);
 }
