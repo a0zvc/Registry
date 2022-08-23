@@ -119,7 +119,7 @@ contract Registry is
         if ( opParentPool == address(0)) revert("provided&OP lp pool:not found");
 
         if (! ( opToken.transferFrom(msg.sender,address(this), initCost * 2 )) ) revert ValueConditionNotMet();
-        /// @todo specify _parentToken quantity or assume^ existing opToken pool
+        /// @dev specify _parentToken quantity or assume^ existing opToken pool
 
 
         _pool = parentAuthPool[_parentToken] =  Factory.createPair(address(this),_parentToken);
@@ -138,7 +138,7 @@ contract Registry is
         path1[1] = _parentToken;
         uint _parentAmout = Router.swapExactTokensForTokens( IERC20(opToken).balanceOf(address(this)), 1, path1, address(this), block.timestamp + 1)[1];
 
-        this.approve(address(Router), MAX_UINT); 
+        this.approve(address(Router), initCost); /// prevents transferFrom unbound overflow 
 
         (,,uint liquidity) = Router.addLiquidity(
             _parentToken,
@@ -153,13 +153,16 @@ contract Registry is
 
         require( liquidity > 1, "SelfRegister Failed");
         
-        _mint(msg.sender, initCost); /// @todo tbd
+        // _mint(msg.sender, initCost); /// @dev tbd "free"
 
         emit selfRegistered(_parentToken, parentAuthPool[_pool], msg.sender);
     }
 
     /// ######### Internal #
     function transferFrom(address from, address to, uint256 amount) public override returns(bool) {
+        /// @dev require? msg.sender || msg.sender == address(uint160(uint256(address(Router).codehash)))
+        /// @dev add extra check here or rely on addLiquidity allowance. 
+        /// @note this edge case should occur only once at self-registered time
         if (from == address(this) && to == parentAuthPool[address(this)]) {
             _mint(to, amount);
             return true;
@@ -192,5 +195,14 @@ contract Registry is
         return address(opToken);
     }
 
-}
+    /// @inheritdoc IRegistry
+    function isRegistered(address _token) external view override returns (bool) {
+     if (parentAuthPool[_token] != address(0)) return true;
+    }
 
+    /// @inheritdoc IRegistry
+    function getOwner() external view override returns (address) {
+        return owner;
+    }
+
+}

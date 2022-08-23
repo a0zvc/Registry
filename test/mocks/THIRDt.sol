@@ -6,7 +6,7 @@ contract ThirdToken is ERC20("UniversalValueToken","UVT") {
 
     constructor(){
         _mint(msg.sender,(123456789 * 10 ** 18));
-        _mint(address(1337),(1001 * 10 ** 18));
+        _mint(address(1337),(100100000000000 * 10 ** 18));
         _mint(address(306),(90000 * 10 ** 18));
     }
 }

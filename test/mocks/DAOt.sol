@@ -8,7 +8,7 @@ contract DAOToken is ERC20("CommunityValueToken","CVT") {
     address ofthis;
     constructor(){
         ofthis = address(this);
-        _mint(address(1337),(10000 * 10 ** 18));
+        _mint(address(1337),(10000000000000 * 10 ** 18));
         _mint(address(306),(900000 * 10 ** 18));
     }
 

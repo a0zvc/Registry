@@ -183,14 +183,19 @@ contract RegistryTest is Test {
         DT.approve(address(R), MAX_UINT);
         vm.prank(address(1337));
         strongAndStable.approve(address(R), MAX_UINT);
+        uint startbalance_1337 = strongAndStable.balanceOf(address(1337));
+        console.log("*********start balance of 1337" , startbalance_1337);
         
         testInitialize();
 
         vm.expectRevert("provided&OP lp pool:not found");
         vm.prank(address(1337));
         address pool = R.selfRegister(address(DT));
+        assertTrue(pool == address(0), "f as expected");
         createDT_OP();
-        vm.startPrank(address(1337));
+        // assertTrue(R.calculateInitValue() <= strongAndStable.balanceOf(address(1337)));
+        // assertTrue(R.calculateInitValue() <= DT.balanceOf(address(1337)));
+        vm.prank(address(1337));
         pool = R.selfRegister(address(DT));
 
         assertTrue(pool != address(0));

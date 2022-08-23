@@ -33,5 +33,5 @@ interface IRegistry {
 
     /// @notice gets address of current owner
     /// @dev from Ownable
-    function owner() external view returns (address);
+    function getOwner() external view returns (address);
 }
